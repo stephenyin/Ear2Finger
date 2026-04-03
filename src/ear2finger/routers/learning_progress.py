@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from auth import get_current_user
-from database import LearningProgress, Sentence, User, Video, get_db
+from ear2finger.auth import get_current_user
+from ear2finger.database import LearningProgress, Sentence, User, Video, get_db
 router = APIRouter()
 
 

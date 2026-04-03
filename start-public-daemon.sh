@@ -70,11 +70,12 @@ if [[ "$PORT" -eq 80 ]] || [[ "$PORT" -eq 443 ]]; then
   fi
 fi
 
-cd "$ROOT/backend"
+cd "$ROOT"
+export PYTHONPATH="$ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 
 # Detach from terminal: nohup + redirect stdio; disown where supported
 nohup env PYTHONUNBUFFERED=1 \
-  "$PY" -m uvicorn main:app --host "$HOST" --port "$PORT" \
+  "$PY" -m uvicorn ear2finger.app:app --host "$HOST" --port "$PORT" \
   >>"$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 

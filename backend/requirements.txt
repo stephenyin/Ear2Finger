@@ -1,9 +1,6 @@
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-python-multipart==0.0.6
-yt-dlp==2026.2.4
-sqlalchemy==2.0.25
-aiosqlite==0.19.0
-passlib[bcrypt]==1.7.4
-python-jose[cryptography]==3.3.0
+# Dependencies are declared in the repository root `pyproject.toml`.
+# From `backend/` with your venv active:
+#   pip install -e ..
+#
+# For a normal install from PyPI:
+#   pip install ear2finger

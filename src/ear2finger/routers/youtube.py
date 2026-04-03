@@ -3,9 +3,9 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from database import get_db, Video, Sentence, User, PlaylistVideo
-from auth import get_current_user
-from services.youtube_processor import YouTubeProcessor
+from ear2finger.database import get_db, Video, Sentence, User, PlaylistVideo
+from ear2finger.auth import get_current_user
+from ear2finger.services.youtube_processor import YouTubeProcessor
 import re
 import os
 

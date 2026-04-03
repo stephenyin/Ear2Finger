@@ -1,29 +1,20 @@
-# Ear2Finger Backend
+# Ear2Finger backend (shim)
 
-FastAPI backend for the Ear2Finger application.
+Application code lives in **`../src/ear2finger/`** and is packaged via the repo root **`pyproject.toml`**.
 
-## Quick Start
+## Quick start (development)
 
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+From **`backend/`** with a virtualenv:
 
-2. Run the server:
-   ```bash
-   uvicorn main:app --reload
-   ```
+```bash
+pip install -e ..
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 8000
+```
 
-3. Visit `http://localhost:8000/docs` for API documentation
+Alternatively, **`main.py`** prepends **`../src`** to `sys.path`, so this also works without an editable install:
 
-## Project Structure
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-- `main.py` - FastAPI application and middleware configuration
-- `routers/` - API route handlers
-  - `health.py` - Health check endpoints
-  - `dictation.py` - Dictation exercise endpoints
-- `models/` - Data models (for future use)
-
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure as needed.
+SQLite defaults to **`./ear2finger.db` relative to the process working directory**; set **`DATABASE_URL`** if you need a fixed path.

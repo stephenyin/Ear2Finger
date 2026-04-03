@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from database import get_db, Playlist, Video, PlaylistVideo, Sentence, User
-from auth import get_current_user
+from ear2finger.database import get_db, Playlist, Video, PlaylistVideo, Sentence, User
+from ear2finger.auth import get_current_user
 
 router = APIRouter()
 
@@ -166,7 +166,7 @@ async def get_playlist_videos(
         PlaylistVideo.playlist_id == playlist_id
     ).order_by(PlaylistVideo.order).all()
 
-    from database import Sentence
+    from ear2finger.database import Sentence
     result = []
     for pv in playlist_videos:
         video = db.query(Video).filter(

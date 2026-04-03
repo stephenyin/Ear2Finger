@@ -27,24 +27,14 @@ A locally deployable web application that allows users to improve their English 
 
 ```
 Ear2Finger/
-├── backend/                     # FastAPI backend
-│   ├── main.py                  # FastAPI application entry point
-│   ├── database.py              # Database models and connection
-│   ├── config.py                # AI coach + Qdrant configuration (GEMINI_MODEL, QDRANT_URL, etc.)
-│   ├── routers/                 # API route handlers
-│   │   ├── health.py            # Health check endpoint
-│   │   ├── dictation.py         # Dictation exercise endpoints (legacy)
-│   │   ├── learning_progress.py # Aggregated per-user practice statistics
-│   │   ├── ai_coach.py          # AI coach / AI agent endpoints
-│   │   └── youtube.py           # YouTube video processing endpoints
-│   ├── services/                # Business logic services
-│   │   ├── youtube_processor.py # YouTube subtitle extraction and processing
-│   │   ├── qdrant_client.py     # Qdrant ingestion + semantic search helpers
-│   │   └── ai_client_factory.py # LLM + embedding client factory
-│   ├── models/                  # Data models (legacy)
-│   ├── requirements.txt         # Python dependencies
-│   └── .env.example             # Environment variables template
-│
+├── pyproject.toml               # Python package metadata (PyPI) + dependencies
+├── src/ear2finger/              # Installable application package
+│   ├── app.py                   # FastAPI app (serves /api + bundled UI from web/dist when present)
+│   ├── database.py, auth.py, …  # Core modules and routers/, services/
+│   └── web/dist/                # Production frontend build (copy from frontend/dist before releases)
+├── backend/
+│   ├── main.py                  # Thin shim: uvicorn main:app (adds ../src to PYTHONPATH)
+│   └── requirements.txt         # Points to pyproject.toml; use pip install -e ..
 ├── frontend/                    # React frontend
 │   ├── src/
 │   │   ├── App.tsx              # Main React component with tab navigation
@@ -138,12 +128,52 @@ Ear2Finger/
 
    The frontend will be available at `http://localhost:3000`
 
+## PyPI package
+
+The Python distribution name is **`ear2finger`** (see `pyproject.toml`). Build wheels locally as below, then publish to PyPI with Twine when you are ready.
+
+**Install and run** (bundled UI + API on one port):
+
+```bash
+pip install ear2finger
+ear2finger --host 0.0.0.0 --port 8000
+# Open http://127.0.0.1:8000
+```
+
+**Develop from a git clone** (editable install):
+
+```bash
+pip install -e .
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Refresh the bundled UI before building a release wheel** (after `npm run build` in `frontend/`):
+
+```bash
+rm -rf src/ear2finger/web/dist && cp -R frontend/dist src/ear2finger/web/dist
+```
+
+**Build sdist + wheel** (from repo root, in a virtualenv):
+
+```bash
+pip install build
+python -m build
+```
+
+**Upload** (Twine + PyPI credentials):
+
+```bash
+pip install twine
+twine upload dist/*
+```
+
 ## Running the Application
 
-1. **Start the backend** (from `backend/` directory):
+1. **Start the backend** (from `backend/` with venv, after `pip install -e ..`):
    ```bash
-   uvicorn main:app --reload
+   uvicorn ear2finger.app:app --reload
    ```
+   Or, without installing the package: `cd backend && uvicorn main:app --reload` (shim loads `src/`).
 
 2. **Start the frontend** (from `frontend/` directory, in a new terminal):
    ```bash

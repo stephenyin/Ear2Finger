@@ -21,32 +21,33 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-# Start backend
+# Start backend (installs the `ear2finger` package from repo root in editable mode)
 echo "Starting backend..."
-cd backend
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$REPO_ROOT/backend"
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment..."
     python3 -m venv venv
 fi
 source venv/bin/activate
-pip install -q -r requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
+pip install -q -e ".."
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
-cd ..
+cd "$REPO_ROOT"
 
 # Wait a moment for backend to start
 sleep 2
 
 # Start frontend
 echo "Starting frontend..."
-cd frontend
+cd "$REPO_ROOT/frontend"
 if [ ! -d "node_modules" ]; then
     echo "Installing frontend dependencies..."
     npm install
 fi
 npm run dev &
 FRONTEND_PID=$!
-cd ..
+cd "$REPO_ROOT"
 
 echo ""
 echo "Both servers are running!"

@@ -5,7 +5,7 @@ import tempfile
 import shutil
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
-from database import Video, Sentence
+from ear2finger.database import Video, Sentence
 import os
 
 class YouTubeProcessor:

@@ -8,7 +8,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-from database import get_db, User
+from ear2finger.database import get_db, User
 
 # HTTP Bearer token (frontend sends Authorization: Bearer <token>)
 security = HTTPBearer(auto_error=False)

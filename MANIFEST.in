@@ -1,0 +1,2 @@
+# Ensure bundled SPA is included in sdist/wheel (package-data covers wheel; sdist needs this)
+recursive-include src/ear2finger/web *
