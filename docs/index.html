@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ear2Finger - Dictation Practice with AI Coach</title>
+    <title>Ear2Finger — YouTube dictation practice</title>
     <style>
       :root {
         --bg: #f7f7fb;
@@ -328,7 +328,7 @@
           <img src="./assets/icon.png" alt="Ear2Finger icon" />
           <div class="title">
             <strong>Ear2Finger</strong>
-            <span>Dictation practice + AI coach</span>
+            <span>YouTube subtitles → dictation</span>
           </div>
         </div>
         <nav aria-label="Page navigation">
@@ -346,12 +346,12 @@
       <div class="hero" id="top">
         <div class="hero-grid">
           <div>
-            <div class="kicker">YouTube subtitles → Sentence dictation → AI coach feedback</div>
+            <div class="kicker">YouTube subtitles → Sentence dictation → Progress &amp; stats</div>
             <h1>Turn listening into active dictation</h1>
             <p class="lead">
               <strong>Ear2Finger</strong> is a locally deployable web app that turns YouTube videos into
-              sentence-by-sentence dictation practice. Your progress is tracked and your AI
-              coach recommends what to study next.
+              sentence-by-sentence dictation practice: per-word typing, hints, playlists, and a dashboard
+              for your practice history—running on your machine with SQLite.
             </p>
             <div class="cta-row">
               <a class="btn primary" href="#how-to-use">Start practicing</a>
@@ -366,7 +366,7 @@
               <img src="./assets/dashboard.png" alt="Dashboard screenshot" />
             </div>
             <p style="margin: 10px 0 0; color: var(--muted); font-size: 13px; text-align: center;">
-              Dashboard with session stats and AI coach recap.
+              Dashboard with session stats and daily practice charts.
             </p>
           </div>
         </div>
@@ -381,14 +381,14 @@
               Practice with per-word inputs and keyboard shortcuts.
             </p>
             <ul class="list">
-              <li>YouTube Import + Subtitle Processing</li>
-              <li>Dictation workspace with per-word typing</li>
-              <li>Session Progress Tracking (Correct/Hint/Incorrect)</li>
-              <li>AI Coach Feedback and Practice Recommendations</li>
+              <li>YouTube import and subtitle processing (yt-dlp + FFmpeg for audio)</li>
+              <li>Dictation workspace with per-word typing and keyboard shortcuts</li>
+              <li>Session progress tracking (correct / hints / incorrect)</li>
+              <li>Playlists, lesson history, and aggregated stats on the dashboard</li>
             </ul>
             <p>
-              The AI coach uses your practice history plus vector search to surface sentences
-              based on your current weak spots.
+              Install from source or via <code class="inline">pip install ear2finger</code> for a single-process
+              server that serves the API and the built web UI (PyPI package).
             </p>
           </div>
           <div>
@@ -406,8 +406,8 @@
                 <div class="cap">Dictation workspace</div>
               </div>
               <div class="shot">
-                <img src="./assets/ai-api.png" alt="AI API settings screenshot" />
-                <div class="cap">AI API settings</div>
+                <img src="./assets/dashboard.png" alt="Dashboard stats screenshot" />
+                <div class="cap">Practice dashboard</div>
               </div>
             </div>
           </div>
@@ -417,10 +417,16 @@
       <section class="card" id="installation">
         <h2>2) Installation</h2>
         <h3 style="margin: 4px 0 4px; font-size: 16px; color: var(--text);">
-          • Install from Docker image
+          • Install from PyPI
         </h3>
-        <p style="margin: 6px 0 14px; color: var(--muted);">
-          TBD – a prebuilt Docker image and run instructions will be provided here.
+        <p style="margin: 6px 0 8px; color: var(--muted);">
+          The <code class="inline">ear2finger</code> package includes the API server and the production web UI.
+          Use a virtual environment, then:
+        </p>
+        <pre><code>pip install ear2finger
+ear2finger</code></pre>
+        <p style="margin: 8px 0 14px; color: var(--muted); font-size: 14px;">
+          Open <code class="inline">http://127.0.0.1:9528</code> in your browser.
         </p>
 
         <h3 style="margin: 4px 0 4px; font-size: 16px; color: var(--text);">
@@ -431,19 +437,25 @@
         </p>
         <div class="grid-2">
           <div>
-            <h4 style="margin: 8px 0 0; font-size: 14px; color: var(--text);">Backend</h3>
+            <h4 style="margin: 8px 0 0; font-size: 14px; color: var(--text);">Backend</h4>
             <pre><code>cd backend
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn main:app --reload --host 0.0.0.0 --port 8000</code></pre>
+pip install -e ..
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528</code></pre>
+            <p style="margin: 8px 0 0; color: var(--muted); font-size: 13px;">
+              Shorthand without installing the package: <code class="inline">cd backend</code> then
+              <code class="inline">uvicorn main:app --reload --port 9528</code> (shim loads <code class="inline">../src</code>).
+            </p>
           </div>
           <div>
-            <h4 style="margin: 8px 0 0; font-size: 14px; color: var(--text);">Frontend</h3>
+            <h4 style="margin: 8px 0 0; font-size: 14px; color: var(--text);">Frontend</h4>
             <pre><code>cd frontend
 npm install
 npm run dev</code></pre>
+            <p style="margin: 8px 0 0; color: var(--muted); font-size: 13px;">
+              Dev UI: <code class="inline">http://localhost:9528</code> — API proxied to port <strong>9528</strong>.
+            </p>
           </div>
         </div>
       </section>
@@ -451,7 +463,11 @@ npm run dev</code></pre>
       <section class="card" id="how-to-use">
         <h2>3) How to use</h2>
         <ul class="list">
-          <li>Open the app in your browser (default: <code class="inline">http://localhost:3000</code>).</li>
+          <li>
+            Open the app in your browser: <code class="inline">http://localhost:3000</code> when using
+            <code class="inline">npm run dev</code>, or <code class="inline">http://127.0.0.1:9528</code> when you
+            installed from PyPI and ran <code class="inline">ear2finger</code>.
+          </li>
           <li>Import a YouTube lesson (will extract subtitles, download audio, and build a dictation session).</li>
           <li>Practice sentence-by-sentence:
             <ul>
@@ -459,7 +475,7 @@ npm run dev</code></pre>
               <li>Type what you hear; get underline guidance, hints, and looped playback</li>
             </ul>
           </li>
-          <li>When you’re ready, open <strong>Ask coach</strong> to get AI feedback and recommendations.</li>
+          <li>Review your stats on the <strong>Dashboard</strong> and resume past sessions from <strong>Lesson history</strong>.</li>
         </ul>
         <div style="margin-top: 14px;">
           <p style="margin: 0 0 6px; color: var(--muted); font-size: 13px;">
@@ -497,7 +513,7 @@ npm run dev</code></pre>
           <li>Multi-language dictation and proper noun detection</li>
           <li>Token/character-level typing UX for languages without spaces (e.g. Chinese, Japanese, Korean)</li>
           <li>More configurable review sessions (weak-word schedules)</li>
-          <li>More AI coach features (e.g. sentence difficulty, network search for practice recommendations)</li>
+          <li>Optional AI coach / recommendations in a separate full build (LLM + vector store)</li>
         </ul>
       </section>
 
@@ -505,9 +521,10 @@ npm run dev</code></pre>
         <h2>5) FAQs</h2>
 
         <details open>
-          <summary>Do I need an AI key?</summary>
+          <summary>Do I need an AI API key?</summary>
           <p style="margin: 8px 0 0; color: var(--muted);">
-            Yes, to use the AI coach features. Configure your provider keys in the app Settings.
+            Not for this lite build. Core dictation, playlists, and stats work without any LLM provider.
+            A full variant may add coach features that require API keys.
           </p>
         </details>
 
@@ -522,8 +539,8 @@ npm run dev</code></pre>
         <details>
           <summary>Is my practice data stored locally?</summary>
           <p style="margin: 8px 0 0; color: var(--muted);">
-            By default, this project stores data locally (SQLite + Qdrant). For cloud deployments,
-            it depends on where you host the database and vector store.
+            By default, data lives in a local <strong>SQLite</strong> file (configurable via
+            <code class="inline">DATABASE_URL</code>). For cloud deployments, point that URL at your hosted database.
           </p>
         </details>
       </section>
@@ -540,7 +557,7 @@ npm run dev</code></pre>
 
       <footer class="wrap">
         <div>
-          © Ear2Finger. Built for language learning with dictation practice and an AI coach.
+          © Ear2Finger — dictation practice from YouTube subtitles.
         </div>
       </footer>
     </main>

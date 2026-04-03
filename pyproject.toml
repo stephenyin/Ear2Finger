@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ear2finger"
-version = "1.0.0"
+version = "1.0.1"
 description = "YouTube subtitle dictation practice — FastAPI backend and bundled React UI"
 readme = "README.md"
 requires-python = ">=3.10"

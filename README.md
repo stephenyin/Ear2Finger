@@ -1,27 +1,22 @@
 # Ear2Finger
 
-A locally deployable web application that allows users to improve their English listening and dictation skills, **with an AI coach that analyzes your practice history and recommends what to study next**.
+A locally deployable web application for **English listening and dictation practice**: import YouTube videos with subtitles, practice sentence-by-sentence with per-word input and hints, track progress on a dashboard, and organize lessons in playlists. This **lite** branch ships **without** AI coach features, vector search, or external LLM API keys—the same **SQLite** schema remains compatible with the full app if you share a database.
 
 ## Tech Stack
 
 ### Backend
-- **Python 3.8+**
-- **FastAPI** - Modern, fast web framework for building APIs
-- **Uvicorn** - ASGI server
-- **yt-dlp** - YouTube video and subtitle extraction
-- **SQLAlchemy** - Database ORM
-- **SQLite** - Database for storing videos and sentences
-- **NLTK** - Natural language processing for sentence segmentation
-- **Qdrant** - Vector database for storing sentence and learning-history embeddings (AI coach)
-- **sentence-transformers** - Local embedding models for sentence and history vectors
-- **Gemini** (via LangChain) - LLM provider powering the AI coach feedback
+- **Python 3.10+**
+- **FastAPI** — HTTP API
+- **Uvicorn** — ASGI server
+- **yt-dlp** — YouTube metadata and subtitle extraction
+- **SQLAlchemy** — ORM
+- **SQLite** — Videos, sentences, users, playlists, progress (default `DATABASE_URL`)
 
 ### Frontend
-- **React 18** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Vite** - Fast build tool and dev server
-- **Axios** - HTTP client
+- **React 18** + **TypeScript**
+- **Tailwind CSS**
+- **Vite** — dev server (proxies `/api` → `http://localhost:9528`)
+- **Axios** — API client
 
 ## Project Structure
 
@@ -29,302 +24,137 @@ A locally deployable web application that allows users to improve their English 
 Ear2Finger/
 ├── pyproject.toml               # Python package metadata (PyPI) + dependencies
 ├── src/ear2finger/              # Installable application package
-│   ├── app.py                   # FastAPI app (serves /api + bundled UI from web/dist when present)
-│   ├── database.py, auth.py, …  # Core modules and routers/, services/
-│   └── web/dist/                # Production frontend build (copy from frontend/dist before releases)
+│   ├── app.py                   # FastAPI app: /api + bundled UI from web/dist when present
+│   ├── database.py, auth.py, config.py
+│   ├── routers/, services/      # API routes and YouTube processing
+│   └── web/dist/                # Production UI (sync from frontend/dist before releases)
 ├── backend/
-│   ├── main.py                  # Thin shim: uvicorn main:app (adds ../src to PYTHONPATH)
-│   └── requirements.txt         # Points to pyproject.toml; use pip install -e ..
-├── frontend/                    # React frontend
-│   ├── src/
-│   │   ├── App.tsx              # Main React component with tab navigation
-│   │   ├── components/          # React components
-│   │   │   ├── Workspace.tsx       # Dictation workspace with per-word input + AI coach panel
-│   │   │   ├── Dashboard.tsx       # Practice dashboard with AI coach summary and tips
-│   │   │   ├── LessonHistory.tsx   # Per-lesson session history with “Ask coach” integration
-│   │   │   └── YouTubeProcessor.tsx# YouTube video processing UI
-│   │   ├── main.tsx             # React entry point
-│   │   └── index.css            # Global styles with Tailwind
-│   ├── package.json             # Node.js dependencies
-│   ├── vite.config.ts           # Vite configuration
-│   ├── tsconfig.json            # TypeScript configuration
-│   └── tailwind.config.js       # Tailwind CSS configuration
-│
-└── README.md                    # This file
+│   ├── main.py                  # Shim: uvicorn main:app prepends ../src to PYTHONPATH
+│   └── requirements.txt         # Use pip install -e .. from repo root
+├── frontend/                    # React SPA (dev on port 3000)
+├── docs/                        # Static documentation site (index.html)
+├── run-dev.sh                   # Backend (9528) + frontend (3000)
+├── start-public-daemon.sh       # Optional detached server (default port 80)
+└── README.md
 ```
 
 ## Prerequisites
 
-- **Python 3.8+** and pip
-- **Node.js 18+** and npm (or yarn/pnpm)
-- **FFmpeg** (required for MP3 audio conversion from YouTube videos)
-  - Install on macOS: `brew install ffmpeg`
-  - Install on Ubuntu/Debian: `sudo apt-get install ffmpeg`
-  - Install on Windows: Download from [FFmpeg website](https://ffmpeg.org/download.html)
+- **Python 3.10+** and pip  
+- **Node.js 18+** and npm (or yarn/pnpm)  
+- **FFmpeg** — MP3 extraction from YouTube  
+  - macOS: `brew install ffmpeg`  
+  - Ubuntu/Debian: `sudo apt-get install ffmpeg`  
+  - Windows: [ffmpeg.org](https://ffmpeg.org/download.html)
 
-## Setup Instructions
+## Setup
 
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   ```
-
-3. Activate the virtual environment:
-   - On macOS/Linux:
-     ```bash
-     source venv/bin/activate
-     ```
-   - On Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
-
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. (Recommended) Copy environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` to configure:
-   - Database, Qdrant URL/API key, and embedding model
-   - Gemini API key and `GEMINI_MODEL` (required for the AI coach)
-
-6. Run the development server:
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-   The API will be available at `http://localhost:8000`
-   - API documentation: `http://localhost:8000/docs` (Swagger UI)
-   - Alternative docs: `http://localhost:8000/redoc`
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-   (or use `yarn install` or `pnpm install`)
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-   The frontend will be available at `http://localhost:3000`
-
-## PyPI package
-
-The Python distribution name is **`ear2finger`** (see `pyproject.toml`). Build wheels locally as below, then publish to PyPI with Twine when you are ready.
-
-**Install and run** (bundled UI + API on one port):
+### Backend (recommended: editable install from repo root)
 
 ```bash
-pip install ear2finger
-ear2finger --host 0.0.0.0 --port 8000
-# Open http://127.0.0.1:8000
+cd backend
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -e ..
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528
 ```
 
-**Develop from a git clone** (editable install):
+Or from `backend/` without installing the package:
 
 ```bash
-pip install -e .
-uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 9528
 ```
 
-**Refresh the bundled UI before building a release wheel** (after `npm run build` in `frontend/`):
+API: `http://localhost:9528` — docs at `/docs` and `/redoc`.
 
-```bash
-rm -rf src/ear2finger/web/dist && cp -R frontend/dist src/ear2finger/web/dist
-```
-
-**Build sdist + wheel** (from repo root, in a virtualenv):
-
-```bash
-pip install build
-python -m build
-```
-
-**Upload** (Twine + PyPI credentials):
-
-```bash
-pip install twine
-twine upload dist/*
-```
-
-## Running the Application
-
-1. **Start the backend** (from `backend/` with venv, after `pip install -e ..`):
-   ```bash
-   uvicorn ear2finger.app:app --reload
-   ```
-   Or, without installing the package: `cd backend && uvicorn main:app --reload` (shim loads `src/`).
-
-2. **Start the frontend** (from `frontend/` directory, in a new terminal):
-   ```bash
-   npm run dev
-   ```
-
-3. Open your browser and navigate to `http://localhost:3000`
-
-## Features
-
-### Core Learning Flow
-- **YouTube import**: Paste a YouTube URL and turn it into a structured dictation lesson.
-- **Extract subtitles**: Automatically extract subtitles from YouTube videos using yt-dlp.
-- **Download MP3 audio**: Download audio-only MP3 files from YouTube videos (requires FFmpeg).
-- **Sentence segmentation**: Intelligently segment subtitles into individual sentences using NLTK.
-- **Timestamp storage**: Store each sentence with precise start and end timestamps.
-- **Database storage**: Store processed videos, sentences, audio paths, and learning events in SQLite.
-- **Dictation workspace**: Practice sentence-by-sentence with per-word inputs, hints, and keyboard shortcuts.
-- **Lesson playlists**: Organize imported videos into playlists and track progress per lesson.
-
-### **AI Coach / AI Agent (highlight)**
-
-The AI coach is a **personalized language-learning agent** that reads your practice history and:
-
-- **Summarizes your progress**: Explains what you are doing well and where you are struggling, based on:
-  - Per-word spelling difficulty
-  - Hint usage
-  - Error rates over time
-- **Generates tailored advice**: Produces 3–5 concrete, numbered suggestions for what to practice next.
-- **Recommends sentences to review**: Uses Qdrant to find sentences containing your weakest words and surfaces them as practice recommendations.
-- **Respects your data**: Uses your own practice stats and sentence history only; embeddings and vectors are stored in your own Qdrant instance.
-
-Where you see the AI coach in the UI:
-
-- **Dashboard**:
-  - `Dashboard.tsx` shows an **AI Language Coach** card with lightweight tips and recommended YouTube channels.
-  - You can open a **full-screen AI coach modal** to read detailed feedback and see recommended lessons.
-- **Workspace**:
-  - `Workspace.tsx` can automatically open an **AI coach side panel** when you finish a lesson.
-  - The panel shows a session recap and lets you request **practice recommendations** for the current video.
-- **Lesson history**:
-  - `LessonHistory.tsx` adds an **“Ask coach”** button per past session so you can get feedback on specific practice days.
-
-AI coach plumbing:
-
-- Backend endpoints:
-  - `/api/user/progress` + `/api/user/stats` aggregate fine-grained word- and sentence-level stats.
-  - `/api/ai/coach/feedback` generates natural-language feedback via Gemini.
-  - `/api/ai/coach/recommend-practice` queries Qdrant for similar sentences based on your weakest words.
-- Vector store:
-  - `qdrant_client.py` ingests:
-    - Per-sentence learning events (`LearningProgress`) as **user learning events**.
-    - All lesson sentences as **sentence embeddings** for semantic search.
-  - Qdrant can run locally (default `http://localhost:6333`) or via Qdrant Cloud.
-- LLM + embeddings:
-  - `ai_client_factory.py` builds:
-    - A Gemini chat model (configurable via `GEMINI_MODEL` and API key in `.env`).
-    - A local `sentence-transformers` embedding model for Qdrant.
-
-To **enable the AI coach**, you need:
-
-- A running **Qdrant** instance (local or cloud) reachable from the backend.
-- A valid **Gemini API key** and model name configured in `backend/.env`.
-- A logged-in user practicing at least a few sentences so that stats and vectors exist.
-
-### How It Works
-1. User submits a YouTube video URL through the web interface.
-2. Backend uses yt-dlp to extract video metadata and subtitles (supports both manual and auto-generated subtitles).
-3. Subtitles are parsed from WebVTT format and segmented into sentences.
-4. Each sentence is stored with its timestamp information in the database.
-5. Users can browse processed videos and view all sentences with timestamps.
-6. While practicing, per-word correctness, hints, and error characters are sent to `/api/user/progress`, aggregated by `/api/user/stats`, and ingested into Qdrant.
-7. The AI coach uses these stats and vectors to generate feedback and practice recommendations.
-
-## API Endpoints
-
-### Health
-- `GET /api/health` - Health check endpoint
-
-### Dictation (Legacy)
-- `GET /api/dictations` - Get all dictation exercises
-- `GET /api/dictations/{id}` - Get a specific dictation exercise
-- `POST /api/dictations` - Create a new dictation exercise
-
-### YouTube Processing
-- `POST /api/youtube/process` - Process a YouTube video (extract subtitles, download MP3 audio, and segment)
-- `GET /api/youtube/videos` - Get all processed videos
-- `GET /api/youtube/videos/{video_id}` - Get a specific video
-- `GET /api/youtube/videos/{video_id}/sentences` - Get all sentences for a video
-- `GET /api/youtube/videos/{video_id}/audio` - Download the MP3 audio file for a video
-- `DELETE /api/youtube/videos/{video_id}` - Delete a video, its sentences, and audio file
-
-### Learning Progress & Stats
-- `GET /api/user/progress` - Get raw learning progress events for the current user
-- `POST /api/user/progress` - Upsert a learning progress event for a sentence/video
-- `GET /api/user/stats` - Get aggregated user stats (totals, distributions, and top tricky words)
-
-### AI Coach / AI Agent
-- `POST /api/ai/coach/feedback` - Generate personalized, LLM-based feedback from aggregated user stats
-- `POST /api/ai/coach/recommend-practice` - Recommend sentences/videos to review based on weak words and Qdrant search
-
-See the interactive API documentation at `http://localhost:8000/docs` for more details.
-
-## Development
-
-### Backend Development
-
-- The backend uses FastAPI with automatic API documentation.
-- Code is organized in routers for different features.
-- Add new endpoints by creating routers in `backend/routers/`.
-- AI coach behavior is primarily in:
-  - `routers/learning_progress.py` (stats aggregation)
-  - `routers/ai_coach.py` (AI coach endpoints)
-  - `services/qdrant_client.py` (vector store)
-  - `services/ai_client_factory.py` (LLM + embeddings).
-
-### Frontend Development
-
-- The frontend uses Vite for fast hot module replacement.
-- TypeScript provides type safety.
-- Tailwind CSS is configured and ready to use.
-- Components are in `frontend/src/`, with AI coach UI in:
-  - `components/Dashboard.tsx`
-  - `components/Workspace.tsx`
-  - `components/LessonHistory.tsx`.
-
-## Building for Production
-
-### Backend
-
-The backend can be run with uvicorn in production mode:
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-
-For production, consider using a process manager like systemd, supervisor, or Docker.
+Optional environment variables (e.g. `.env` in your working directory): `DATABASE_URL`, `SECRET_KEY` (see your deployment notes).
 
 ### Frontend
 
-Build the frontend for production:
 ```bash
 cd frontend
-npm run build
+npm install
+npm run dev
 ```
 
-The built files will be in `frontend/dist/` and can be served by any static file server or integrated with the backend.
+App UI: `http://localhost:3000` (API requests go to the backend on **9528** via Vite proxy).
+
+## PyPI package
+
+Distribution name: **`ear2finger`** (`pyproject.toml`). Build and publish when ready.
+
+```bash
+pip install ear2finger
+ear2finger --host 0.0.0.0 --port 9528
+# http://127.0.0.1:9528 — bundled UI + /api
+```
+
+**Editable clone:**
+
+```bash
+pip install -e .
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528
+```
+
+**Before building a release wheel** (refresh bundled UI):
+
+```bash
+rm -rf src/ear2finger/web/dist && cp -R frontend/dist src/ear2finger/web/dist
+pip install build && python -m build
+```
+
+**Upload to PyPI:** `pip install twine && twine upload dist/*`
+
+Installing from **TestPyPI** only resolves a tiny subset of dependencies; use `--extra-index-url https://pypi.org/simple/` so packages like `yt-dlp` resolve correctly.
+
+## Running the application
+
+1. Backend on **9528** (see above).  
+2. Frontend: `cd frontend && npm run dev` → open `http://localhost:3000`.  
+3. Or use `./run-dev.sh` to start both.
+
+## Features
+
+- **YouTube import** — Subtitles (manual or auto) via yt-dlp; optional MP3 audio (FFmpeg).  
+- **Sentence segmentation** — Timestamped sentences stored in SQLite.  
+- **Workspace** — Per-word dictation, hints, keyboard shortcuts, playlists.  
+- **Dashboard** — Aggregated practice stats and daily charts.  
+- **Users** — Registration/login; superuser user management in Settings.  
+- **Lesson history** — Per-video session list with resume.
+
+## API overview
+
+- **Health:** `GET /api/health`  
+- **Auth:** register, login, `/api/auth/me`  
+- **YouTube:** process URL, list videos/sentences, audio download, delete  
+- **Playlists:** CRUD and video membership  
+- **Progress:** `GET/POST /api/user/progress`, `GET /api/user/stats`  
+- **Users (admin):** `GET/POST/PUT/DELETE /api/users`  
+- **User config:** `GET/PUT /api/user/config` (stores settings in DB; lite UI does not expose AI keys)  
+- **Lesson sessions:** list/save sessions per video  
+
+Interactive docs: `http://localhost:9528/docs`.
+
+## Development
+
+- Python package lives under **`src/ear2finger/`** — add routers there and register them in **`app.py`**.  
+- Frontend: **`frontend/src/components/`**.  
+- After changing the UI for a **wheel release**, rebuild and copy **`frontend/dist`** → **`src/ear2finger/web/dist`**.
+
+## Production
+
+```bash
+uvicorn ear2finger.app:app --host 0.0.0.0 --port 9528
+```
+
+Or install the wheel and run `ear2finger`. Use a reverse proxy (nginx, Caddy), process manager, or **`start-public-daemon.sh`** (defaults to port **80**, often requires `sudo`).
+
+Serve **`frontend/dist`** separately if you do not bundle it; otherwise the installed package serves **`web/dist`** from the same origin as `/api`.
 
 ## License
 
-See LICENSE file for details.
+See [LICENSE](LICENSE).
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Pull requests are welcome.

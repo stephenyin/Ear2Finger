@@ -8,9 +8,14 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+.build-venv/
+src/*.egg-info/
 build/
 develop-eggs/
 dist/
+# PyPI wheel ships pre-built UI under src/ (override dist/ ignore)
+!src/ear2finger/web/dist/
+!src/ear2finger/web/dist/**
 downloads/
 backend/downloads/
 backend/audio/

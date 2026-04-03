@@ -5,7 +5,7 @@
 
 echo "Starting Ear2Finger development servers..."
 echo ""
-echo "Backend will run on: http://localhost:8000"
+echo "Backend will run on: http://localhost:9528"
 echo "Frontend will run on: http://localhost:3000"
 echo ""
 echo "Press Ctrl+C to stop all servers"
@@ -31,7 +31,7 @@ if [ ! -d "venv" ]; then
 fi
 source venv/bin/activate
 pip install -q -e ".."
-uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 8000 &
+uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528 &
 BACKEND_PID=$!
 cd "$REPO_ROOT"
 

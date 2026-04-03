@@ -13,8 +13,8 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument(
         "--port",
         type=int,
-        default=int(os.environ.get("PORT", "8000")),
-        help="Bind port (default 8000)",
+        default=int(os.environ.get("PORT", "9528")),
+        help="Bind port (default 9528)",
     )
     p.add_argument("--reload", action="store_true", help="Dev auto-reload")
     args = p.parse_args(argv)
