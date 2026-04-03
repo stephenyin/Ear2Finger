@@ -2,6 +2,30 @@
 
 A locally deployable web application for **English listening and dictation practice**: import YouTube videos with subtitles, practice sentence-by-sentence with per-word input and hints, track progress on a dashboard, and organize lessons in playlists. This **lite** branch ships **without** AI coach features, vector search, or external LLM API keys—the same **SQLite** schema remains compatible with the full app if you share a database.
 
+## Demo videos
+
+Open on YouTube: [Import a YouTube lesson](https://youtu.be/TEuXrHZ0VSE) · [Dictation practice](https://youtu.be/5z7yxVxZC1I)
+
+*(Inline players below work in many Markdown previews and doc sites. On [github.com](https://github.com) the iframes are hidden—use the links above.)*
+
+### 🎥 Import a YouTube lesson into Ear2Finger
+
+<div align="center">
+  <a href="https://youtu.be/TEuXrHZ0VSE">
+    <img src="https://img.youtube.com/vi/TEuXrHZ0VSE/hqdefault.jpg" alt="Import a YouTube lesson into Ear2Finger" width="1080"/>
+  </a>
+  <p><strong><a href="https://youtu.be/TEuXrHZ0VSE">📺 Watch: Import a YouTube lesson into Ear2Finger</a></strong></p>
+</div>
+
+### 🎥 Dictation practice in Ear2Finger
+
+<div align="center">
+  <a href="https://youtu.be/5z7yxVxZC1I">
+    <img src="https://img.youtube.com/vi/5z7yxVxZC1I/hqdefault.jpg" alt="Dictation practice in Ear2Finger" width="1080"/>
+  </a>
+  <p><strong><a href="https://youtu.be/5z7yxVxZC1I">📺 Watch: Dictation practice in Ear2Finger </a></strong></p>
+</div>
+
 ## Tech Stack
 
 ### Backend
@@ -80,30 +104,6 @@ Installing from **TestPyPI** only resolves a tiny subset of dependencies; use `-
 - **Dashboard** — Aggregated practice stats and daily charts.
 - **Users** — Registration/login; superuser user management in Settings.
 - **Lesson history** — Per-video session list with resume.
-
-## Demo videos
-
-Open on YouTube: [Import a YouTube lesson](https://youtu.be/TEuXrHZ0VSE) · [Dictation practice](https://youtu.be/5z7yxVxZC1I)
-
-*(Inline players below work in many Markdown previews and doc sites. On [github.com](https://github.com) the iframes are hidden—use the links above.)*
-
-### 🎥 Import a YouTube lesson into Ear2Finger
-
-<div align="center">
-  <a href="https://youtu.be/TEuXrHZ0VSE">
-    <img src="https://img.youtube.com/vi/TEuXrHZ0VSE/hqdefault.jpg" alt="Import a YouTube lesson into Ear2Finger" width="1080"/>
-  </a>
-  <p><strong><a href="https://youtu.be/TEuXrHZ0VSE">📺 Watch: Import a YouTube lesson into Ear2Finger</a></strong></p>
-</div>
-
-### 🎥 Dictation practice in Ear2Finger
-
-<div align="center">
-  <a href="https://youtu.be/5z7yxVxZC1I">
-    <img src="https://img.youtube.com/vi/5z7yxVxZC1I/hqdefault.jpg" alt="Dictation practice in Ear2Finger" width="1080"/>
-  </a>
-  <p><strong><a href="https://youtu.be/5z7yxVxZC1I">📺 Watch: Dictation practice in Ear2Finger </a></strong></p>
-</div>
 
 ## API overview
 
