@@ -87,35 +87,23 @@ Open on YouTube: [Import a YouTube lesson](https://youtu.be/TEuXrHZ0VSE) · [Dic
 
 *(Inline players below work in many Markdown previews and doc sites. On [github.com](https://github.com) the iframes are hidden—use the links above.)*
 
-### Import a YouTube lesson into Ear2Finger
+### 🎥 Import a YouTube lesson into Ear2Finger
 
-<p align="center">
-  <iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/TEuXrHZ0VSE"
-    title="Import a YouTube lesson into Ear2Finger"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin"
-    allowfullscreen
-  ></iframe>
-</p>
+<div align="center">
+  <a href="https://youtu.be/TEuXrHZ0VSE">
+    <img src="https://img.youtube.com/vi/TEuXrHZ0VSE/hqdefault.jpg" alt="Import a YouTube lesson into Ear2Finger" width="1080"/>
+  </a>
+  <p><strong><a href="https://youtu.be/TEuXrHZ0VSE">📺 Watch: Import a YouTube lesson into Ear2Finger</a></strong></p>
+</div>
 
-### Dictation practice in Ear2Finger
+### 🎥 Dictation practice in Ear2Finger
 
-<p align="center">
-  <iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/5z7yxVxZC1I"
-    title="Dictation practice in Ear2Finger"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin"
-    allowfullscreen
-  ></iframe>
-</p>
+<div align="center">
+  <a href="https://youtu.be/5z7yxVxZC1I">
+    <img src="https://img.youtube.com/vi/5z7yxVxZC1I/hqdefault.jpg" alt="Dictation practice in Ear2Finger" width="1080"/>
+  </a>
+  <p><strong><a href="https://youtu.be/5z7yxVxZC1I">📺 Watch: Dictation practice in Ear2Finger </a></strong></p>
+</div>
 
 ## API overview
 
