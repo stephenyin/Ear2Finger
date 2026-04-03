@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  getLessonSessions,
-  getCoachFeedback,
-  type LessonSessionRecord,
-  type CoachFeedbackResponse,
-} from '../api'
+import { getLessonSessions, type LessonSessionRecord } from '../api'
 
 function formatDate(d: string): string {
   const date = new Date(d)
@@ -40,19 +34,12 @@ function groupByDate(sessions: LessonSessionRecord[]): { dateLabel: string; sess
 interface LessonHistoryProps {
   videoId: number | null
   onResume?: (session: LessonSessionRecord) => void
-  isLessonFinished?: boolean
 }
 
-export default function LessonHistory({ videoId, onResume, isLessonFinished }: LessonHistoryProps) {
+export default function LessonHistory({ videoId, onResume }: LessonHistoryProps) {
   const [sessions, setSessions] = useState<LessonSessionRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [coachOpen, setCoachOpen] = useState(false)
-  const [activeSession, setActiveSession] = useState<LessonSessionRecord | null>(null)
-  const [coachLoading, setCoachLoading] = useState(false)
-  const [coachError, setCoachError] = useState<string | null>(null)
-  const [coachFeedback, setCoachFeedback] = useState<CoachFeedbackResponse | null>(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (!videoId) {
@@ -68,103 +55,8 @@ export default function LessonHistory({ videoId, onResume, isLessonFinished }: L
 
   const grouped = groupByDate(sessions)
 
-  const handleAskCoach = (session: LessonSessionRecord) => {
-    if (!videoId) return
-    setCoachOpen(true)
-    setActiveSession(session)
-    setCoachLoading(true)
-    setCoachError(null)
-    setCoachFeedback(null)
-    getCoachFeedback({
-      video_id: videoId,
-      from_date: session.started_at,
-      to_date: session.ended_at ?? session.started_at,
-    })
-      .then((data) => {
-        setCoachFeedback(data)
-      })
-      .catch((e) => {
-        const err = e as { response?: { data?: { detail?: string } } }
-        setCoachError(
-          err.response?.data?.detail ||
-            'AI coach is unavailable. Check your AI API key in Settings.'
-        )
-      })
-      .finally(() => setCoachLoading(false))
-  }
-
   return (
     <div className="fixed bottom-6 right-3 left-3 md:left-auto md:bottom-8 md:right-4 z-40 flex flex-col items-stretch md:items-end space-y-2">
-      {coachOpen && (
-        <div className="w-full max-w-sm md:w-80 max-h-[60vh] overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl flex flex-col">
-          <div className="px-3 py-2 border-b border-gray-200 flex items-center justify-between">
-            <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-gray-900 truncate">Ask coach about session</h2>
-              {activeSession && (
-                <p className="text-[11px] text-gray-500">
-                  {formatDate(activeSession.started_at)} · {formatTime(activeSession.started_at)}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setCoachOpen(false)}
-              className="p-1 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-              aria-label="Close coach panel"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="px-3 py-2 text-xs text-gray-600 border-b border-gray-100">
-            Feedback is based on your overall stats; date filters may be used in future versions.
-          </div>
-          <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3 text-sm">
-            {coachError && (
-              <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-                {coachError}{' '}
-                <button
-                  type="button"
-                  onClick={() => navigate('/settings')}
-                  className="underline font-medium"
-                >
-                  Open AI settings
-                </button>
-              </div>
-            )}
-            {coachLoading && !coachFeedback && !coachError && (
-              <p className="text-sm text-gray-600">Asking your AI coach…</p>
-            )}
-            {coachFeedback && (
-              <>
-                <p className="text-sm text-gray-700 whitespace-pre-line">
-                  {coachFeedback.summary}
-                </p>
-                {coachFeedback.suggestions?.length > 0 && (
-                  <ul className="space-y-2">
-                    {coachFeedback.suggestions.map((s, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-gray-700">
-                        <span className="mt-0.5 w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-medium">
-                          {i + 1}
-                        </span>
-                        <span>{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-            {!coachLoading && !coachFeedback && !coachError && (
-              <p className="text-sm text-gray-600">
-                Connect an AI key in Settings and choose &ldquo;Ask coach&rdquo; on a session to see
-                personalized tips.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -210,15 +102,6 @@ export default function LessonHistory({ videoId, onResume, isLessonFinished }: L
                                 >
                                   <span className="mr-1">↺</span>
                                   Resume
-                                </button>
-                              )}
-                              {isLessonFinished && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleAskCoach(s)}
-                                  className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
-                                >
-                                  Ask coach
                                 </button>
                               )}
                             </div>

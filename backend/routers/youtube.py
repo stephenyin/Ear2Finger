@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, HttpUrl, field_validator
 from sqlalchemy.orm import Session
@@ -6,7 +6,6 @@ from typing import List, Optional
 from database import get_db, Video, Sentence, User, PlaylistVideo
 from auth import get_current_user
 from services.youtube_processor import YouTubeProcessor
-from services.qdrant_client import ingest_sentences_for_video
 import re
 import os
 
@@ -66,7 +65,6 @@ class ProcessVideoResponse(BaseModel):
 @router.post("/youtube/process", response_model=ProcessVideoResponse)
 async def process_youtube_video(
     request: YouTubeUrlRequest,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -75,15 +73,6 @@ async def process_youtube_video(
         result = processor.process_youtube_video(
             request.url, db, user_id=current_user.id
         )
-
-        # Kick off background ingestion of sentences into Qdrant.
-        video_id = result.get("video_id")
-        if isinstance(video_id, int):
-            background_tasks.add_task(
-                ingest_sentences_for_video,
-                video_id=video_id,
-                user_id=current_user.id,
-            )
 
         return ProcessVideoResponse(**result)
     except ValueError as e:

@@ -165,18 +165,5 @@ async def set_config(
             continue
         upsert_key(key, str(value) if value is not None else None)
 
-    # Optional validation: if a provider is configured, ensure we have *some* key,
-    # either from this request or existing config (including legacy api_key).
-    final_ai_provider = ai_provider or configs.get("ai_provider")
-    if final_ai_provider:
-        # Re-read keys for the chosen provider
-        provider_key_name = f"{final_ai_provider}_api_key"
-        provider_key_val = body.get(provider_key_name) or configs.get(provider_key_name)
-        if not provider_key_val and not configs.get("api_key"):
-            raise HTTPException(
-                status_code=400,
-                detail=f"Missing API key for provider '{final_ai_provider}'. Please provide it.",
-            )
-
     db.commit()
     return {"message": "Config updated"}

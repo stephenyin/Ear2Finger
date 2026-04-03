@@ -1,5 +1,9 @@
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from routers import (
     health,
     dictation,
@@ -10,8 +14,6 @@ from routers import (
     learning_progress,
     users,
     lesson_sessions,
-    ai_keys,
-    ai_coach,
 )
 from database import init_db
 
@@ -45,10 +47,38 @@ app.include_router(user_config.router, prefix="/api", tags=["user"])
 app.include_router(learning_progress.router, prefix="/api", tags=["user"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(lesson_sessions.router, prefix="/api", tags=["lesson-sessions"])
-app.include_router(ai_keys.router, prefix="/api", tags=["user"])
-app.include_router(ai_coach.router, prefix="/api", tags=["ai-coach"])
+
+# Production SPA: built Vite app (sibling ../frontend/dist). Same origin as /api — no CORS issues.
+_FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+_ASSETS_DIR = _FRONTEND_DIST / "assets"
 
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to Ear2Finger API"}
+def _spa_enabled() -> bool:
+    return _FRONTEND_DIST.is_dir() and (_FRONTEND_DIST / "index.html").is_file()
+
+
+if _spa_enabled():
+    if _ASSETS_DIR.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(_ASSETS_DIR)), name="assets")
+
+    @app.get("/")
+    async def root_spa():
+        return FileResponse(_FRONTEND_DIST / "index.html")
+
+    @app.get("/{full_path:path}")
+    async def spa_or_static(full_path: str):
+        if full_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="Not found")
+        candidate = _FRONTEND_DIST / full_path
+        try:
+            candidate.resolve().relative_to(_FRONTEND_DIST.resolve())
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Not found") from None
+        if candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")
+else:
+
+    @app.get("/")
+    async def root():
+        return {"message": "Welcome to Ear2Finger API"}

@@ -2,14 +2,12 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from auth import get_current_user
 from database import LearningProgress, Sentence, User, Video, get_db
-from services.qdrant_client import ingest_learning_progress_event
-
 router = APIRouter()
 
 
@@ -117,7 +115,6 @@ async def get_progress(
 @router.post("/user/progress")
 async def upsert_progress(
     body: ProgressEntry,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -164,13 +161,6 @@ async def upsert_progress(
         db.add(target)
     db.commit()
     db.refresh(target)
-
-    # Ingest this learning event into Qdrant in the background so that
-    # the AI coach can later retrieve rich, contextual practice history.
-    background_tasks.add_task(
-        ingest_learning_progress_event,
-        learning_progress_id=target.id,
-    )
 
     return {"message": "Progress saved"}
 
