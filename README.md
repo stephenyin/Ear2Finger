@@ -38,55 +38,14 @@ Ear2Finger/
 └── README.md
 ```
 
-## Prerequisites
-
-- **Python 3.10+** and pip  
-- **Node.js 18+** and npm (or yarn/pnpm)  
-- **FFmpeg** — MP3 extraction from YouTube  
-  - macOS: `brew install ffmpeg`  
-  - Ubuntu/Debian: `sudo apt-get install ffmpeg`  
-  - Windows: [ffmpeg.org](https://ffmpeg.org/download.html)
-
-## Setup
-
-### Backend (recommended: editable install from repo root)
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -e ..
-uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528
-```
-
-Or from `backend/` without installing the package:
-
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 9528
-```
-
-API: `http://localhost:9528` — docs at `/docs` and `/redoc`.
-
-Optional environment variables (e.g. `.env` in your working directory): `DATABASE_URL`, `SECRET_KEY` (see your deployment notes).
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-App UI: `http://localhost:3000` (API requests go to the backend on **9528** via Vite proxy).
-
 ## PyPI package
 
 Distribution name: **`ear2finger`** (`pyproject.toml`). Build and publish when ready.
 
 ```bash
 pip install ear2finger
-ear2finger --host 0.0.0.0 --port 9528
-# http://127.0.0.1:9528 — bundled UI + /api
+ear2finger
+# http://127.0.0.1:9528
 ```
 
 **Editable clone:**
@@ -109,36 +68,72 @@ Installing from **TestPyPI** only resolves a tiny subset of dependencies; use `-
 
 ## Running the application
 
-1. Backend on **9528** (see above).  
-2. Frontend: `cd frontend && npm run dev` → open `http://localhost:3000`.  
+1. Backend on **9528** (see above).
+2. Frontend: `cd frontend && npm run dev` → open `http://localhost:3000`.
 3. Or use `./run-dev.sh` to start both.
 
 ## Features
 
-- **YouTube import** — Subtitles (manual or auto) via yt-dlp; optional MP3 audio (FFmpeg).  
-- **Sentence segmentation** — Timestamped sentences stored in SQLite.  
-- **Workspace** — Per-word dictation, hints, keyboard shortcuts, playlists.  
-- **Dashboard** — Aggregated practice stats and daily charts.  
-- **Users** — Registration/login; superuser user management in Settings.  
+- **YouTube import** — Subtitles (manual or auto) via yt-dlp; optional MP3 audio (FFmpeg).
+- **Sentence segmentation** — Timestamped sentences stored in SQLite.
+- **Workspace** — Per-word dictation, hints, keyboard shortcuts, playlists.
+- **Dashboard** — Aggregated practice stats and daily charts.
+- **Users** — Registration/login; superuser user management in Settings.
 - **Lesson history** — Per-video session list with resume.
+
+## Demo videos
+
+Open on YouTube: [Import a YouTube lesson](https://youtu.be/TEuXrHZ0VSE) · [Dictation practice](https://youtu.be/5z7yxVxZC1I)
+
+*(Inline players below work in many Markdown previews and doc sites. On [github.com](https://github.com) the iframes are hidden—use the links above.)*
+
+### Import a YouTube lesson into Ear2Finger
+
+<p align="center">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/TEuXrHZ0VSE"
+    title="Import a YouTube lesson into Ear2Finger"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
+</p>
+
+### Dictation practice in Ear2Finger
+
+<p align="center">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/5z7yxVxZC1I"
+    title="Dictation practice in Ear2Finger"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
+</p>
 
 ## API overview
 
-- **Health:** `GET /api/health`  
-- **Auth:** register, login, `/api/auth/me`  
-- **YouTube:** process URL, list videos/sentences, audio download, delete  
-- **Playlists:** CRUD and video membership  
-- **Progress:** `GET/POST /api/user/progress`, `GET /api/user/stats`  
-- **Users (admin):** `GET/POST/PUT/DELETE /api/users`  
-- **User config:** `GET/PUT /api/user/config` (stores settings in DB; lite UI does not expose AI keys)  
-- **Lesson sessions:** list/save sessions per video  
+- **Health:** `GET /api/health`
+- **Auth:** register, login, `/api/auth/me`
+- **YouTube:** process URL, list videos/sentences, audio download, delete
+- **Playlists:** CRUD and video membership
+- **Progress:** `GET/POST /api/user/progress`, `GET /api/user/stats`
+- **Users (admin):** `GET/POST/PUT/DELETE /api/users`
+- **User config:** `GET/PUT /api/user/config` (stores settings in DB; lite UI does not expose AI keys)
+- **Lesson sessions:** list/save sessions per video
 
 Interactive docs: `http://localhost:9528/docs`.
 
 ## Development
 
-- Python package lives under **`src/ear2finger/`** — add routers there and register them in **`app.py`**.  
-- Frontend: **`frontend/src/components/`**.  
+- Python package lives under **`src/ear2finger/`** — add routers there and register them in **`app.py`**.
+- Frontend: **`frontend/src/components/`**.
 - After changing the UI for a **wheel release**, rebuild and copy **`frontend/dist`** → **`src/ear2finger/web/dist`**.
 
 ## Production
@@ -153,7 +148,7 @@ Serve **`frontend/dist`** separately if you do not bundle it; otherwise the inst
 
 ## License
 
-See [LICENSE](LICENSE).
+This project is released under the [MIT License](LICENSE).
 
 ## Contributing
 
