@@ -30,8 +30,11 @@ if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
 source venv/bin/activate
-pip install -q -e ".."
-uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528 &
+if ! pip install -e ".."; then
+  echo "ERROR: pip install -e .. failed (fix pyproject.toml / network, then retry)." >&2
+  exit 1
+fi
+python -m uvicorn ear2finger.app:app --reload --host 0.0.0.0 --port 9528 &
 BACKEND_PID=$!
 cd "$REPO_ROOT"
 
