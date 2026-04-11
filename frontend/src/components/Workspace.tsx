@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../contexts/AuthContext'
 import { useWorkspace, type Lesson } from '../contexts/WorkspaceContext'
 import ImportModal from './ImportModal'
+import AiCoachNavButton from './AiCoachNavButton'
 import LessonHistory from './LessonHistory'
 
 interface Notification {
@@ -1141,6 +1142,7 @@ export default function Workspace() {
             </svg>
             Dashboard
           </button>
+          <AiCoachNavButton />
           <button
             onClick={() => navigate('/settings')}
             className="px-2 py-2 md:px-4 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-1.5 md:gap-2 text-sm md:text-base"

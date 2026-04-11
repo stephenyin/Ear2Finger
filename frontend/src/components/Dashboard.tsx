@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getUserStats, type DailyUserStats, type UserStats, type WordStat } from '../api'
+import AiCoachNavButton from './AiCoachNavButton'
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  /** Lite build: AI Coach + suggestions are UI preview only (no backend). */
+  const aiCoachPreviewDisabled = true
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -130,6 +133,7 @@ export default function Dashboard() {
             </svg>
             Dashboard
           </button>
+          <AiCoachNavButton />
           <button
             onClick={() => navigate('/settings')}
             className="px-2 py-2 md:px-4 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-1.5 md:gap-2 text-sm md:text-base"
@@ -215,9 +219,9 @@ export default function Dashboard() {
                 />
               </section>
 
-              {/* Daily trends */}
-              <section className="grid grid-cols-1 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
+              {/* Daily stats + AI suggestions (side by side on large screens) */}
+              <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+                <div className="bg-white rounded-xl border border-gray-200 p-4 min-h-0 flex flex-col">
                   <h2 className="text-sm font-semibold text-gray-900 mb-1">
                     Daily stats
                   </h2>
@@ -380,6 +384,77 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
+
+                {/* AI suggestions — preview only in Lite */}
+                <section
+                  id="ai-suggestions"
+                  className={`relative rounded-xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-white p-4 md:p-5 scroll-mt-4 min-h-0 flex flex-col h-full ${
+                    aiCoachPreviewDisabled ? 'opacity-60' : ''
+                  }`}
+                  aria-disabled={aiCoachPreviewDisabled}
+                  title={
+                    aiCoachPreviewDisabled
+                      ? 'Preview only — AI suggestions are not included in Ear2Finger Lite.'
+                      : undefined
+                  }
+                >
+                  {aiCoachPreviewDisabled && (
+                    <div
+                      className="absolute inset-0 z-[1] cursor-not-allowed rounded-xl bg-white/20"
+                      aria-hidden
+                    />
+                  )}
+                  <div className="relative z-0 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3 shrink-0">
+                    <div>
+                      <h2 className="text-sm font-semibold text-violet-950 flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4 text-violet-600 shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                          />
+                        </svg>
+                        AI suggestions
+                      </h2>
+                      <p className="text-xs text-violet-800/80 mt-1">
+                        Personalized next steps based on your mistakes, pace, and vocabulary — powered by an AI coach in
+                        the full product.
+                      </p>
+                    </div>
+                    <span className="shrink-0 self-start rounded-full border border-violet-300/60 bg-white/80 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700">
+                      Preview
+                    </span>
+                  </div>
+                  <ul className="relative z-0 space-y-2 text-sm text-gray-700 flex-1 min-h-0">
+                    <li className="flex gap-2 rounded-lg border border-violet-100/80 bg-white/70 px-3 py-2">
+                      <span className="text-violet-500 font-medium shrink-0">1.</span>
+                      <span>
+                        Drill short sentences with your highest retry words — sample: connect practice to real clips you
+                        import.
+                      </span>
+                    </li>
+                    <li className="flex gap-2 rounded-lg border border-violet-100/80 bg-white/70 px-3 py-2">
+                      <span className="text-violet-500 font-medium shrink-0">2.</span>
+                      <span>
+                        Balance hint usage vs. blind retries on recent lessons to build listening confidence.
+                      </span>
+                    </li>
+                    <li className="flex gap-2 rounded-lg border border-violet-100/80 bg-white/70 px-3 py-2">
+                      <span className="text-violet-500 font-medium shrink-0">3.</span>
+                      <span>
+                        Try one level-up video per week from channels with clear subtitles (see channel links in Daily
+                        stats).
+                      </span>
+                    </li>
+                  </ul>
+                </section>
               </section>
 
               {/* Top tricky words — compact list with retry counts and pagination */}

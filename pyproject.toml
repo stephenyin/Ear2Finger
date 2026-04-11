@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ear2finger"
-version = "1.0.5"
+version = "1.0.7"
 description = "YouTube subtitle dictation practice — FastAPI backend and bundled React UI"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Stephen Yin" }]
+authors = [{ name = "Hang Yin (Stephen)" }]
 keywords = ["dictation", "youtube", "esl", "fastapi", "education"]
 classifiers = [
   "Development Status :: 4 - Beta",
