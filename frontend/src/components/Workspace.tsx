@@ -1945,6 +1945,7 @@ export default function Workspace() {
         </div>
         <div className="flex items-center gap-2 md:gap-4 flex-wrap justify-start md:justify-end">
           <span><kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono">Enter</kbd> play / pause</span>
+          <span><kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono">Tab</kbd> hint</span>
           <span><kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono">[</kbd> previous sentence</span>
           <span><kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono">]</kbd> next sentence</span>
           <span><kbd className="px-1.5 py-0.5 bg-white border border-gray-300 rounded font-mono">Space</kbd> next word input</span>
