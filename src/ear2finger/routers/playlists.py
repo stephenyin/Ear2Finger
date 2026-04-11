@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ear2finger.database import get_db, Playlist, Video, PlaylistVideo, Sentence, User
 from ear2finger.auth import get_current_user
+from ear2finger.demo_access import get_video_for_user, is_demo_user
 
 router = APIRouter()
 
@@ -204,11 +205,7 @@ async def add_video_to_playlist(
     if not playlist:
         raise HTTPException(status_code=404, detail="Playlist not found")
 
-    video = db.query(Video).filter(
-        Video.id == video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
 
@@ -243,6 +240,11 @@ async def remove_video_from_playlist(
     current_user: User = Depends(get_current_user),
 ):
     """Remove a video from a playlist"""
+    if is_demo_user(db, current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Demo accounts cannot remove lessons from a playlist.",
+        )
     playlist = db.query(Playlist).filter(
         Playlist.id == playlist_id,
         Playlist.user_id == current_user.id,

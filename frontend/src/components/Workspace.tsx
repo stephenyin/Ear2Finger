@@ -26,6 +26,7 @@ interface Notification {
 export default function Workspace() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const isDemo = Boolean(user?.is_demo)
   const ws = useWorkspace()
   const {
     playlists,
@@ -1317,20 +1318,24 @@ export default function Workspace() {
                     className="absolute right-2 top-10 z-10 py-1 bg-white border border-gray-200 rounded-lg shadow-lg text-left min-w-[200px]"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFromPlaylist(lesson)}
-                      className="block w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                    >
-                      Remove from this playlist
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteLesson(lesson)}
-                      className="block w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
-                    >
-                      Delete lesson
-                    </button>
+                    {!isDemo && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromPlaylist(lesson)}
+                        className="block w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      >
+                        Remove from this playlist
+                      </button>
+                    )}
+                    {!isDemo && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteLesson(lesson)}
+                        className="block w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                      >
+                        Delete lesson
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleOpenYoutubeForLesson(lesson)}
@@ -1338,27 +1343,31 @@ export default function Workspace() {
                     >
                       Open original YouTube video
                     </button>
-                    <div className="my-1 border-t border-gray-100" />
-                    <div className="px-3 py-1 text-[11px] font-medium text-gray-500">
-                      Move to playlist
-                    </div>
-                    {playlists.filter((p) => p.id !== selectedPlaylistId).length === 0 ? (
-                      <div className="px-3 py-1 text-xs text-gray-400">
-                        No other playlists
-                      </div>
-                    ) : (
-                      playlists
-                        .filter((p) => p.id !== selectedPlaylistId)
-                        .map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => handleMoveLessonToPlaylist(lesson, p.id)}
-                            className="block w-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                          >
-                            {p.name}
-                          </button>
-                        ))
+                    {!isDemo && (
+                      <>
+                        <div className="my-1 border-t border-gray-100" />
+                        <div className="px-3 py-1 text-[11px] font-medium text-gray-500">
+                          Move to playlist
+                        </div>
+                        {playlists.filter((p) => p.id !== selectedPlaylistId).length === 0 ? (
+                          <div className="px-3 py-1 text-xs text-gray-400">
+                            No other playlists
+                          </div>
+                        ) : (
+                          playlists
+                            .filter((p) => p.id !== selectedPlaylistId)
+                            .map((p) => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => handleMoveLessonToPlaylist(lesson, p.id)}
+                                className="block w-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                              >
+                                {p.name}
+                              </button>
+                            ))
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -1404,8 +1413,11 @@ export default function Workspace() {
 
           <div className="p-4 border-t border-gray-200">
             <button
+              type="button"
               onClick={() => setIsImportModalOpen(true)}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              disabled={isDemo}
+              title={isDemo ? 'Import is not available in demo mode' : undefined}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:pointer-events-none disabled:opacity-45 disabled:hover:bg-indigo-600"
             >
               Import Lesson
             </button>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Video {
   id: number
@@ -27,6 +29,8 @@ interface ProcessResult {
 }
 
 export default function YouTubeProcessor() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [processing, setProcessing] = useState(false)
   const [processResult, setProcessResult] = useState<ProcessResult | null>(null)
@@ -36,6 +40,10 @@ export default function YouTubeProcessor() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [sentences, setSentences] = useState<Sentence[]>([])
   const [loadingSentences, setLoadingSentences] = useState(false)
+
+  useEffect(() => {
+    if (user?.is_demo) navigate('/workspace', { replace: true })
+  }, [user?.is_demo, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

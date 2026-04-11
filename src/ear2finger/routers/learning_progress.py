@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ear2finger.auth import get_current_user
 from ear2finger.database import LearningProgress, Sentence, User, Video, get_db
+from ear2finger.demo_access import get_video_for_user
 router = APIRouter()
 
 
@@ -119,12 +120,7 @@ async def upsert_progress(
     current_user: User = Depends(get_current_user),
 ):
     """Create or update learning progress for a sentence/video."""
-    # Ensure video belongs to user
-    video = db.query(Video).filter(
-        Video.id == body.video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, body.video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
 

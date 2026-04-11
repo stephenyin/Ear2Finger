@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ear2finger.database import get_db, Video, Sentence, User, PlaylistVideo
 from ear2finger.auth import get_current_user
+from ear2finger.demo_access import get_video_for_user, is_demo_user
 from ear2finger.services.youtube_processor import YouTubeProcessor
 import re
 import os
@@ -69,6 +70,11 @@ async def process_youtube_video(
     current_user: User = Depends(get_current_user),
 ):
     """Process a YouTube video: extract subtitles and segment into sentences"""
+    if is_demo_user(db, current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Demo accounts can practice existing lessons only; importing new videos is disabled.",
+        )
     try:
         result = processor.process_youtube_video(
             request.url, db, user_id=current_user.id
@@ -89,10 +95,10 @@ async def get_videos(
     current_user: User = Depends(get_current_user),
 ):
     """Get all processed videos for the current user (excludes soft-deleted)"""
-    videos = db.query(Video).filter(
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).offset(skip).limit(limit).all()
+    q = db.query(Video).filter(Video.deleted_at.is_(None))
+    if not is_demo_user(db, current_user):
+        q = q.filter(Video.user_id == current_user.id)
+    videos = q.order_by(Video.id.desc()).offset(skip).limit(limit).all()
     result = []
     for video in videos:
         sentence_count = db.query(Sentence).filter(Sentence.video_id == video.id).count()
@@ -111,11 +117,7 @@ async def get_video(
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific video"""
-    video = db.query(Video).filter(
-        Video.id == video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
 
@@ -136,11 +138,7 @@ async def get_video_sentences(
     current_user: User = Depends(get_current_user),
 ):
     """Get sentences for a specific video"""
-    video = db.query(Video).filter(
-        Video.id == video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
 
@@ -195,11 +193,7 @@ async def get_video_audio(
     current_user: User = Depends(get_current_user),
 ):
     """Get the audio file for a specific video. Supports Range requests for seeking."""
-    video = db.query(Video).filter(
-        Video.id == video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, video_id)
 
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
@@ -223,6 +217,11 @@ async def delete_video(
 ):
     """Soft-delete a video: remove from all playlists and hide from UI.
     Video, sentences, LearningProgress, and LessonSession are preserved for analysis."""
+    if is_demo_user(db, current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Demo accounts cannot delete lessons from the shared catalog.",
+        )
     video = db.query(Video).filter(
         Video.id == video_id,
         Video.user_id == current_user.id,

@@ -7,6 +7,7 @@ type AuthContextType = {
   loading: boolean
   login: (username: string, password: string) => Promise<void>
   register: (username: string, password: string, email?: string) => Promise<void>
+  tryDemo: () => Promise<void>
   logout: () => void
   setUser: (u: UserInfo | null) => void
 }
@@ -77,6 +78,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [setUser]
   )
 
+  const tryDemo = useCallback(async () => {
+    const { access_token, user: u } = await api.tryDemo()
+    localStorage.setItem(STORAGE_TOKEN, access_token)
+    setUser(u)
+  }, [setUser])
+
   return (
     <AuthContext.Provider
       value={{
@@ -84,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         register,
+        tryDemo,
         logout,
         setUser,
       }}

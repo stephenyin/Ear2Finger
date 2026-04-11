@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from ear2finger.auth import get_current_user
 from ear2finger.database import LessonSession, User, Video, get_db
+from ear2finger.demo_access import get_video_for_user
 
 router = APIRouter()
 
@@ -43,11 +44,7 @@ async def list_lesson_sessions(
     current_user: User = Depends(get_current_user),
 ):
     """List all sessions for a lesson (video), most recent first."""
-    video = db.query(Video).filter(
-        Video.id == video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Lesson not found")
     sessions = (
@@ -69,11 +66,7 @@ async def save_lesson_session(
     current_user: User = Depends(get_current_user),
 ):
     """Create or update a lesson session. Only saves if at least one sentence practiced (caller checks)."""
-    video = db.query(Video).filter(
-        Video.id == body.video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, body.video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Lesson not found")
 
@@ -124,11 +117,7 @@ async def upsert_current_session(
     if body.sentences_practiced < 1:
         raise HTTPException(status_code=400, detail="Save only when at least one sentence has been completed")
 
-    video = db.query(Video).filter(
-        Video.id == body.video_id,
-        Video.user_id == current_user.id,
-        Video.deleted_at.is_(None),
-    ).first()
+    video = get_video_for_user(db, current_user, body.video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Lesson not found")
 

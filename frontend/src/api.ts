@@ -39,6 +39,8 @@ export interface UserInfo {
   email: string | null
   is_superuser?: boolean
   created_at: string | null
+  /** True for accounts created via Try demo (shared catalog, no new imports). */
+  is_demo?: boolean
 }
 
 export interface AdminUser {
@@ -125,6 +127,26 @@ export async function deleteUser(userId: number): Promise<void> {
 }
 
 const AUTH_TIMEOUT_MS = 15_000
+
+export interface HealthResponse {
+  status: string
+  service?: string
+  demo_try_enabled?: boolean
+}
+
+export async function fetchHealth(): Promise<HealthResponse> {
+  const { data } = await api.get<HealthResponse>('/api/health', { timeout: AUTH_TIMEOUT_MS })
+  return data
+}
+
+export async function tryDemo(): Promise<{ access_token: string; user: UserInfo }> {
+  const { data } = await api.post<{
+    access_token: string
+    token_type: string
+    user: UserInfo
+  }>('/api/auth/try', {}, { timeout: AUTH_TIMEOUT_MS })
+  return { access_token: data.access_token, user: data.user }
+}
 
 export async function getUserStats(): Promise<UserStats> {
   const { data } = await api.get<UserStats>('/api/user/stats')
