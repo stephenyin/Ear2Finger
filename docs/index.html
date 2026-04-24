@@ -271,10 +271,75 @@
         display: block;
       }
 
+      .shot-trigger {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .shot-trigger:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
       .shot .cap {
         margin-top: 8px;
         font-size: 13px;
         color: var(--muted);
+      }
+
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(2, 6, 23, 0.85);
+        padding: 24px;
+      }
+
+      .lightbox.open {
+        display: flex;
+      }
+
+      .lightbox-content {
+        width: min(1100px, 100%);
+        max-height: 100%;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+      }
+
+      .lightbox-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #e2e8f0;
+      }
+
+      .lightbox-close {
+        border: 1px solid rgba(226, 232, 240, 0.4);
+        background: transparent;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+
+      .lightbox-image-wrap {
+        display: grid;
+        place-items: center;
+      }
+
+      .lightbox-image-wrap img {
+        max-width: 100%;
+        max-height: calc(100vh - 120px);
+        border-radius: 10px;
       }
 
       code.inline {
@@ -351,7 +416,7 @@
             <p class="lead">
               <strong>Ear2Finger</strong> is a locally deployable web app that turns YouTube videos into
               sentence-by-sentence dictation practice: per-word typing, hints, playlists, and a dashboard
-              for your practice history—running on your machine with SQLite.
+              for your practice history—running on your machine with SQLite, Qdrant, LangChain, and RAG.
             </p>
             <div class="cta-row">
               <a class="btn primary" href="#how-to-use">Start practicing</a>
@@ -394,19 +459,27 @@
           <div>
             <div class="shot-grid" aria-label="Feature screenshots">
               <div class="shot">
-                <img src="./assets/login.png" alt="Sign in screenshot" />
+                <button class="shot-trigger" data-popup-image="./assets/login.png" data-popup-title="Sign in screenshot" aria-label="Open Sign in screenshot">
+                  <img src="./assets/login.png" alt="Sign in screenshot" />
+                </button>
                 <div class="cap">Sign in</div>
               </div>
               <div class="shot">
-                <img src="./assets/import-lesson.png" alt="Import lesson screenshot" />
+                <button class="shot-trigger" data-popup-image="./assets/import-lesson.png" data-popup-title="Import lesson screenshot" aria-label="Open Import lesson screenshot">
+                  <img src="./assets/import-lesson.png" alt="Import lesson screenshot" />
+                </button>
                 <div class="cap">Import a lesson</div>
               </div>
               <div class="shot">
-                <img src="./assets/dictation.png" alt="Dictation workspace screenshot" />
+                <button class="shot-trigger" data-popup-image="./assets/dictation.png" data-popup-title="Dictation workspace screenshot" aria-label="Open Dictation workspace screenshot">
+                  <img src="./assets/dictation.png" alt="Dictation workspace screenshot" />
+                </button>
                 <div class="cap">Dictation workspace</div>
               </div>
               <div class="shot">
-                <img src="./assets/dashboard.png" alt="Dashboard stats screenshot" />
+                <button class="shot-trigger" data-popup-image="./assets/dashboard.png" data-popup-title="Dashboard stats screenshot" aria-label="Open Dashboard stats screenshot">
+                  <img src="./assets/dashboard.png" alt="Dashboard stats screenshot" />
+                </button>
                 <div class="cap">Practice dashboard</div>
               </div>
             </div>
@@ -517,8 +590,25 @@ npm run dev</code></pre>
         </ul>
       </section>
 
+      <section class="card" id="ai-coach-stack">
+        <h2>5) AI Coach stack (LangChain + Qdrant + RAG)</h2>
+        <p>
+          Ear2Finger has a lightweight core build (dictation + stats) and a separate full AI build.
+          In the full AI build, the recommendation/coach flow uses a Retrieval-Augmented Generation (RAG) pipeline.
+        </p>
+        <ul class="list">
+          <li><strong>Embeddings:</strong> lesson text, transcripts, and coach knowledge snippets are converted into vector embeddings.</li>
+          <li><strong>Qdrant:</strong> those embeddings are indexed in Qdrant as the vector database for similarity search.</li>
+          <li><strong>LangChain:</strong> LangChain orchestrates chunking, embedding calls, vector retrieval, and prompt composition.</li>
+          <li><strong>RAG:</strong> when a learner asks for help, the system retrieves relevant context from Qdrant and injects it into the LLM prompt so responses are grounded in lesson content and practice history.</li>
+        </ul>
+        <p style="margin-top: 10px; color: var(--muted); font-size: 13px;">
+          This design keeps the base app fast and simple while enabling a richer AI coach in deployments that provide an LLM API key and vector storage.
+        </p>
+      </section>
+
       <section class="card" id="faqs">
-        <h2>5) FAQs</h2>
+        <h2>6) FAQs</h2>
 
         <details open>
           <summary>Do I need an AI API key?</summary>
@@ -546,7 +636,7 @@ npm run dev</code></pre>
       </section>
 
       <section class="card" id="contact">
-        <h2>6) Contact information</h2>
+        <h2>7) Contact information</h2>
         <div style="display: flex; gap: 10px;">
           <a href="https://www.linkedin.com/in/hang-yin-stephen/" target="_blank" rel="noreferrer">
             <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /> </a>
@@ -562,5 +652,58 @@ npm run dev</code></pre>
         </div>
       </footer>
     </main>
+    <div class="lightbox" id="shot-lightbox" aria-hidden="true">
+      <div class="lightbox-content" role="dialog" aria-modal="true" aria-labelledby="shot-lightbox-title">
+        <div class="lightbox-header">
+          <strong id="shot-lightbox-title">Screenshot</strong>
+          <button type="button" class="lightbox-close" id="shot-lightbox-close" aria-label="Close image viewer">
+            Close
+          </button>
+        </div>
+        <div class="lightbox-image-wrap">
+          <img id="shot-lightbox-image" src="" alt="" />
+        </div>
+      </div>
+    </div>
+    <script>
+      const lightbox = document.getElementById("shot-lightbox");
+      const lightboxTitle = document.getElementById("shot-lightbox-title");
+      const lightboxImage = document.getElementById("shot-lightbox-image");
+      const lightboxClose = document.getElementById("shot-lightbox-close");
+
+      const closeLightbox = () => {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        lightboxImage.src = "";
+      };
+
+      document.querySelectorAll(".shot-trigger").forEach((button) => {
+        button.addEventListener("click", () => {
+          const imageUrl = button.dataset.popupImage;
+          const title = button.dataset.popupTitle || "Screenshot";
+          if (!imageUrl) return;
+          const absoluteImageUrl = new URL(imageUrl, window.location.href).href;
+          lightboxTitle.textContent = title;
+          lightboxImage.src = absoluteImageUrl;
+          lightboxImage.alt = title;
+          lightbox.classList.add("open");
+          lightbox.setAttribute("aria-hidden", "false");
+        });
+      });
+
+      lightboxClose.addEventListener("click", closeLightbox);
+
+      lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox) {
+          closeLightbox();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && lightbox.classList.contains("open")) {
+          closeLightbox();
+        }
+      });
+    </script>
   </body>
 </html>
