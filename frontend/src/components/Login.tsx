@@ -7,6 +7,8 @@ const GITHUB_REPO_URL = 'https://github.com/stephenyin/Ear2Finger'
 const GITHUB_RELEASES_URL = 'https://github.com/stephenyin/Ear2Finger/releases'
 const PYPI_LITE_URL = 'https://pypi.org/project/ear2finger/'
 const LINKEDIN_URL = 'https://www.linkedin.com/in/hang-yin-stephen/'
+const DESKTOP_SCREENSHOT_1 = '/login-previews/desktop-workspace.png'
+const DESKTOP_SCREENSHOT_2 = '/login-previews/desktop-dashboard.png'
 
 const VID_IMPORT = 'TEuXrHZ0VSE'
 const VID_DICTATION = '5z7yxVxZC1I'
@@ -85,6 +87,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [demoTryEnabled, setDemoTryEnabled] = useState(false)
   const [hintCopied, setHintCopied] = useState(false)
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; alt: string } | null>(null)
 
   useEffect(() => {
     fetchHealth()
@@ -252,6 +255,50 @@ export default function Login() {
                   Workspace coach panels for feedback and recommended practice sentences.
                 </li>
               </ul>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <figure className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLightboxImage({
+                        src: DESKTOP_SCREENSHOT_1,
+                        alt: 'Ear2Finger desktop workspace screenshot',
+                      })
+                    }
+                    className="block h-full w-full text-left"
+                  >
+                    <img
+                      src={DESKTOP_SCREENSHOT_1}
+                      alt="Ear2Finger desktop workspace screenshot"
+                      className="h-full w-full object-cover transition hover:scale-[1.01]"
+                    />
+                  </button>
+                  <figcaption className="border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                    Workspace view with sentence-level dictation.
+                  </figcaption>
+                </figure>
+                <figure className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLightboxImage({
+                        src: DESKTOP_SCREENSHOT_2,
+                        alt: 'Ear2Finger desktop dashboard screenshot',
+                      })
+                    }
+                    className="block h-full w-full text-left"
+                  >
+                    <img
+                      src={DESKTOP_SCREENSHOT_2}
+                      alt="Ear2Finger desktop dashboard screenshot"
+                      className="h-full w-full object-cover transition hover:scale-[1.01]"
+                    />
+                  </button>
+                  <figcaption className="border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                    Dashboard view with learning stats and progress trends.
+                  </figcaption>
+                </figure>
+              </div>
             </section>
 
             <section className="space-y-4 text-left">
@@ -356,6 +403,27 @@ sudo xattr -rd com.apple.quarantine /Applications/Ear2Finger.app`}</code>
             </p>
         </div>
       </div>
+
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+          onClick={() => setLightboxImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+        >
+          <div className="relative max-h-[92vh] max-w-[96vw]" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setLightboxImage(null)}
+              className="absolute -right-2 -top-2 rounded-full bg-white/95 px-2 py-1 text-xs font-semibold text-slate-700 shadow"
+            >
+              Close
+            </button>
+            <img src={lightboxImage.src} alt={lightboxImage.alt} className="max-h-[92vh] max-w-[96vw] rounded-lg border border-white/20 shadow-2xl" />
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes shimmer {
